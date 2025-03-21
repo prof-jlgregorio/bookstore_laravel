@@ -1,17 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Aprendendo Laravel</title>
-</head>
-<body>
 
-    <div>
-        <h1>Bookstore</h1>
+@extends('base')
 
-    </div>
+@section('content')
+
+<h2>Seja bem vindo!</h2>
+<hr>
+<h3>Aplicação Web Construída com Laravel Framework.</h3>
 
 
-</body>
-</html>
+@endsection
+
