@@ -12,7 +12,7 @@ class AuthorController extends Controller
 
     public function __construct()
     {
-        $this->createAuthors();
+        //$this->createAuthors();
 
         if(!session('authors')){
             session(['authors' => $this->authors]);
@@ -67,7 +67,13 @@ class AuthorController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $authorIndex = $this->findObjectIndexById(session('authors'), $id );
+        if($authorIndex >= 0){
+            return view('authors.show')
+                ->with('author', session('authors')[$authorIndex]);
+        } else {
+            abort(404);
+        }
     }
 
     /**
@@ -75,7 +81,13 @@ class AuthorController extends Controller
      */
     public function edit(string $id)
     {
-        return view('authors.edit');
+        $authorIndex = $this->findObjectIndexById(session('authors'), $id );
+        if($authorIndex >= 0){
+            return view('authors.edit')
+                ->with('author', session('authors')[$authorIndex]);
+        } else {
+            abort(404);
+        }
     }
 
     /**
@@ -83,7 +95,17 @@ class AuthorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $authors = session('authors');
+
+        $index = $this->findObjectIndexById($authors, $id);
+
+        $authors[$index]->name = $request->input('name');
+        $authors[$index]->country = $request->input('country');
+
+        session(['authors' => $authors ]);
+
+        return redirect(route('authors.index'));
+
     }
 
     /**
@@ -109,6 +131,15 @@ class AuthorController extends Controller
         $author->name = 'Arthur C. Clarke';
         $author->country = 'Inglaterra';
         $this->authors[] = $author;
+    }
+
+    private function findObjectIndexById(array $objects, string $id){
+        foreach($objects as $index => $object){
+            if(isset($object->id) && $object->id === $id ){
+                return $index;
+            }
+        }
+        return -1;
     }
 
 }
