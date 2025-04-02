@@ -18,7 +18,13 @@
         <td>{{ $author->country }}</td>
         <td> <a href="{{ route("authors.show", $author->id) }}">Exibir</a> </td>
         <td> <a href="{{ route("authors.edit", $author->id) }}">Editar</a> </td>
-        <td> Excluir </td>
+        <td>
+            <form method="post" action="{{ route("authors.destroy", $author->id) }}">
+                @csrf
+                @method("DELETE")
+                <input type="submit" value="Excluir">
+            </form>
+        </td>
     <tr>
     @endforeach
 </table>

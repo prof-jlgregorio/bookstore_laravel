@@ -47,6 +47,11 @@ class AuthorController extends Controller
      */
     public function store(Request $request)
     {
+
+        //validate before persist data
+        $request->validate($this->getRules()['rules'],
+            $this->getRules()['messages']);
+
         $authors = session('authors');
 
         $author = new stdClass;
@@ -113,7 +118,15 @@ class AuthorController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $authorIndex = $this->findObjectIndexById(session('authors'), $id);
+        if($authorIndex >= 0){
+            $authors = session('authors');
+            unset($authors[$authorIndex]);
+            session(['authors' => array_values($authors)]);
+            return redirect()->route("authors.index");
+        } else {
+            return abort(404);
+        }
     }
 
     private function createAuthors() : void {
@@ -140,6 +153,23 @@ class AuthorController extends Controller
             }
         }
         return -1;
+    }
+
+    //validation rules
+    private function getRules()  {
+        $rules = [
+            'name' => 'required|max:50',
+            'country' => 'required|max:30'
+        ];
+
+        $messages = [
+            'name.required' => 'O campo nome é obrigatório!',
+            'name.max' => 'O campo nome pode ter no máximo 50 carateres!',
+            'country.required' => 'O campo país é obrigatório!',
+            'country.max' => 'O campo país pode ter no máximo 30 caracteres'
+        ];
+
+        return ['rules' => $rules, 'messages' => $messages];
     }
 
 }
