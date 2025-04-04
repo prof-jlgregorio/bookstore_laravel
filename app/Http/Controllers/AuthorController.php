@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Author;
 use Illuminate\Http\Request;
 use stdClass;
 
@@ -14,7 +15,7 @@ class AuthorController extends Controller
     {
         //$this->createAuthors();
 
-        if(!session('authors')){
+        if (!session('authors')) {
             session(['authors' => $this->authors]);
         } else {
             $this->authors = session("authors");
@@ -31,7 +32,9 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        return view('authors.index')->with('authors', $this->authors);
+
+        $authors = Author::all();
+        return view('authors.index')->with('authors', $authors);
     }
 
     /**
@@ -49,22 +52,18 @@ class AuthorController extends Controller
     {
 
         //validate before persist data
-        $request->validate($this->getRules()['rules'],
-            $this->getRules()['messages']);
+        $request->validate(
+            $this->getRules()['rules'],
+            $this->getRules()['messages']
+        );
 
-        $authors = session('authors');
 
-        $author = new stdClass;
-        $author->id = uniqid();
+        $author = new Author();
         $author->name = $request->input('name');
         $author->country = $request->input('country');
+        $author->save();
 
-        $authors[] = $author;
-
-        session(['authors' => $authors]);
-
-        return redirect( route('authors.index') );
-
+        return redirect(route('authors.index'));
     }
 
     /**
@@ -72,10 +71,9 @@ class AuthorController extends Controller
      */
     public function show(string $id)
     {
-        $authorIndex = $this->findObjectIndexById(session('authors'), $id );
-        if($authorIndex >= 0){
-            return view('authors.show')
-                ->with('author', session('authors')[$authorIndex]);
+        $author = Author::find($id);
+        if ($author) {
+            return view('authors.show')->with('author', $author);
         } else {
             abort(404);
         }
@@ -86,8 +84,8 @@ class AuthorController extends Controller
      */
     public function edit(string $id)
     {
-        $authorIndex = $this->findObjectIndexById(session('authors'), $id );
-        if($authorIndex >= 0){
+        $authorIndex = $this->findObjectIndexById(session('authors'), $id);
+        if ($authorIndex >= 0) {
             return view('authors.edit')
                 ->with('author', session('authors')[$authorIndex]);
         } else {
@@ -107,10 +105,9 @@ class AuthorController extends Controller
         $authors[$index]->name = $request->input('name');
         $authors[$index]->country = $request->input('country');
 
-        session(['authors' => $authors ]);
+        session(['authors' => $authors]);
 
         return redirect(route('authors.index'));
-
     }
 
     /**
@@ -119,7 +116,7 @@ class AuthorController extends Controller
     public function destroy(string $id)
     {
         $authorIndex = $this->findObjectIndexById(session('authors'), $id);
-        if($authorIndex >= 0){
+        if ($authorIndex >= 0) {
             $authors = session('authors');
             unset($authors[$authorIndex]);
             session(['authors' => array_values($authors)]);
@@ -129,7 +126,8 @@ class AuthorController extends Controller
         }
     }
 
-    private function createAuthors() : void {
+    private function createAuthors(): void
+    {
         //create a new standard class
         $author = new stdClass;
         //set the attributes
@@ -146,9 +144,10 @@ class AuthorController extends Controller
         $this->authors[] = $author;
     }
 
-    private function findObjectIndexById(array $objects, string $id){
-        foreach($objects as $index => $object){
-            if(isset($object->id) && $object->id === $id ){
+    private function findObjectIndexById(array $objects, string $id)
+    {
+        foreach ($objects as $index => $object) {
+            if (isset($object->id) && $object->id === $id) {
                 return $index;
             }
         }
@@ -156,7 +155,8 @@ class AuthorController extends Controller
     }
 
     //validation rules
-    private function getRules()  {
+    private function getRules()
+    {
         $rules = [
             'name' => 'required|max:50',
             'country' => 'required|max:30'
@@ -171,5 +171,4 @@ class AuthorController extends Controller
 
         return ['rules' => $rules, 'messages' => $messages];
     }
-
 }
