@@ -62,7 +62,6 @@ class AuthorController extends Controller
         $author->name = $request->input('name');
         $author->country = $request->input('country');
         $author->save();
-
         return redirect(route('authors.index'));
     }
 
@@ -84,10 +83,9 @@ class AuthorController extends Controller
      */
     public function edit(string $id)
     {
-        $authorIndex = $this->findObjectIndexById(session('authors'), $id);
-        if ($authorIndex >= 0) {
-            return view('authors.edit')
-                ->with('author', session('authors')[$authorIndex]);
+        $author = Author::find($id);
+        if($author){
+            return view('authors.edit')->with('author', $author);
         } else {
             abort(404);
         }
@@ -98,16 +96,21 @@ class AuthorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $authors = session('authors');
 
-        $index = $this->findObjectIndexById($authors, $id);
+        //first, we find the author to update
+        $author = Author::find($id);
 
-        $authors[$index]->name = $request->input('name');
-        $authors[$index]->country = $request->input('country');
-
-        session(['authors' => $authors]);
-
-        return redirect(route('authors.index'));
+        if($author){
+            //update the attrbutes
+            $author->name = $request->input('name');
+            $author->country = $request->input('country');
+            //save
+            $author->save();
+            //redirect to index
+            return redirect(route('authors.index'));
+        } else {
+            abort(404);
+        }
     }
 
     /**
@@ -115,14 +118,13 @@ class AuthorController extends Controller
      */
     public function destroy(string $id)
     {
-        $authorIndex = $this->findObjectIndexById(session('authors'), $id);
-        if ($authorIndex >= 0) {
-            $authors = session('authors');
-            unset($authors[$authorIndex]);
-            session(['authors' => array_values($authors)]);
-            return redirect()->route("authors.index");
+        $author = Author::find($id);
+
+        if($author){
+            Author::destroy($id);
+            return redirect(route('authors.index'));
         } else {
-            return abort(404);
+            abort(404);
         }
     }
 

@@ -19,7 +19,8 @@
         <td> <a href="{{ route("authors.show", $author->id) }}">Exibir</a> </td>
         <td> <a href="{{ route("authors.edit", $author->id) }}">Editar</a> </td>
         <td>
-            <form method="post" action="{{ route("authors.destroy", $author->id) }}">
+           {{-- call the formConfirm  --}}
+            <form method="post" action="{{ route("authors.destroy", $author->id) }}" id="delete-form" onsubmit="return confirm('Deseja Excluir {{ $author->name }} ?')">
                 @csrf
                 @method("DELETE")
                 <input type="submit" value="Excluir">
@@ -33,5 +34,7 @@
 <div>
     <a href="{{ route('index') }}">Voltar ao início</a>
 </div>
+
+
 
 @endsection
